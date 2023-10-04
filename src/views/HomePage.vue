@@ -29,8 +29,8 @@
           thumbnail
           fluid
           :src="
-            student && student.length > 7
-              ? `http://192.168.1.46:8085${student[8]}`
+            student && student.length > 5
+              ? `${API_URL}${student[6]}`
               : 'https://picsum.photos/250/250/?image=54'
           "
           alt="Image 1"
@@ -81,8 +81,8 @@
           v-for="(stu, i) in studentList"
           :key="i"
           :img-src="
-            stu[8]
-              ? `http://192.168.1.46:8085${student[8]}`
+            stu[6]
+              ? `${API_URL}${student[6]}`
               : 'https://picsum.photos/250/250/?image=54'
           "
           img-top
@@ -100,10 +100,15 @@
 </template>
 <script>
 import moment from "moment-timezone";
+import axios from "axios";
+
 export default {
   name: "HomePage",
   data() {
     return {
+      API_URL: "//192.168.1.44:8085",
+      LOCAL_API: "//localhost:3000",
+      JWT_TOKEN: null,
       connection: null,
       datetimeNow: null,
       timezone: "Asia/Bangkok",
@@ -113,16 +118,26 @@ export default {
       studentList: []
     };
   },
-  created() {
+  async created() {
     this.connectToWebSocket();
+    await this.getListUser();
   },
   mounted() {
     this.datetimeNow = moment().tz(this.timezone);
-    // สร้าง interval สำหรับการอัปเดตเวลาทุก 1 วินาที
     setInterval(this.updateThaiTime, 1000);
     this.thaiDate = this.datetimeNow.format("DD/MM/YYYY");
   },
   methods: {
+    async getListUser() {
+      try {
+        const res = await axios.get(
+          `${this.LOCAL_API}/personnel/api/employees/`
+        );
+        console.log("res", res);
+      } catch (err) {
+        console.log("getListUser", err);
+      }
+    },
     updateThaiTime() {
       const now = moment().tz(this.timezone);
       this.thaiTime = now.format("HH:mm:ss");
