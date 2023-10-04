@@ -1,6 +1,9 @@
 <template>
   <div>
     <b-container fluid>
+      <b-row>
+        <b-col cols="4"> <b-link href="#/students">รายงาน</b-link> </b-col>
+      </b-row>
       <b-row class="justify-content-center m-4">
         <b-img fluid :src="require('../../static/logo.png')" :width="200">
         </b-img>
@@ -22,7 +25,9 @@
               <b-card bg-variant="success" text-variant="white">
                 <b-card-body class="p-0">
                   <h6 class="text-center">ภายในวิทยาลัย (Check In)</h6>
-                  <h2 class="text-center mb-0">250</h2></b-card-body
+                  <h2 class="text-center mb-0">
+                    {{ iclockDetails.stuIn }}
+                  </h2></b-card-body
                 >
               </b-card>
             </b-col>
@@ -30,7 +35,9 @@
               <b-card bg-variant="danger" text-variant="white">
                 <b-card-body class="p-0">
                   <h6 class="text-center">นอกวิทยาลัย (Check Out)</h6>
-                  <h2 class="text-center mb-0">250</h2></b-card-body
+                  <h2 class="text-center mb-0">
+                    {{ iclockDetails.stuOut }}
+                  </h2></b-card-body
                 >
               </b-card>
             </b-col>
@@ -38,7 +45,9 @@
               <b-card bg-variant="info" text-variant="white">
                 <b-card-body class="p-0">
                   <h6 class="text-center">นักศึกษาทั้งหมด</h6>
-                  <h2 class="text-center mb-0">250</h2></b-card-body
+                  <h2 class="text-center mb-0">
+                    {{ iclockDetails.totalStu }}
+                  </h2></b-card-body
                 >
               </b-card>
             </b-col>
@@ -57,10 +66,11 @@
               <b-img
                 thumbnail
                 fluid
+                blank-color="#777"
                 :src="
                   student && student.length > 7
                     ? `http://192.168.1.46:8085${student[8]}`
-                    : 'https://picsum.photos/250/250/?image=54'
+                    : require('../../static/blank_img.jpg')
                 "
                 alt="Image 1"
                 :width="200"
@@ -179,12 +189,20 @@ export default {
       thaiTime: "",
       thaiDate: "",
       student: null,
-      studentList: []
+      studentList: [],
+      iclockDetails: {
+        stuIn: 0,
+        stuOut: 0,
+        totalStu: 0
+      }
     };
   },
   async created() {
     this.connectToWebSocket();
-    await this.getListUser();
+    // await this.getListUser();
+    setInterval(async () => {
+      await this.iclock_transaction();
+    }, 2000);
   },
   mounted() {
     this.datetimeNow = moment().tz(this.timezone);
@@ -198,6 +216,14 @@ export default {
           `${this.LOCAL_API}/personnel/api/employees/`
         );
         console.log("res", res);
+      } catch (err) {
+        console.log("getListUser", err);
+      }
+    },
+    async iclock_transaction() {
+      try {
+        const res = await axios.get(`${this.LOCAL_API}/iclock_transaction`);
+        this.iclockDetails = res.data;
       } catch (err) {
         console.log("getListUser", err);
       }
