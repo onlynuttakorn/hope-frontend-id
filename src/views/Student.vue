@@ -113,8 +113,8 @@ export default {
   data() {
     return {
       isBusy: true,
-      API_URL: "//192.168.1.44:8085",
-      LOCAL_API: "//localhost:3000",
+      API_URL: process.env.API_URL,
+      LOCAL_API: process.env.LOCAL_API,
       items: [],
       fields: [
         {
